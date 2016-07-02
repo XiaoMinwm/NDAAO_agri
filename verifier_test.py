@@ -8,3 +8,4 @@ if __name__ == '__main__':
 	for seq in waitSeq:
 		if verifier(seq,model[3],datainput(50)[0]):
 			visualizeAttack(seq, model, datainput(50)[0], 4)
+			visualizeAttack(seq, model, datainput(50)[0], 4)
