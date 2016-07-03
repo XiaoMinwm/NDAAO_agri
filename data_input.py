@@ -32,4 +32,5 @@ def datainput(cycles):
 			binCycleData[cycle].append(cycleData[x])
 		else:
 			cycle += 1
+	#print(singleCycleData,binCycleData)
 	return singleCycleData, binCycleData

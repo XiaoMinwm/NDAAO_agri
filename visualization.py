@@ -15,6 +15,16 @@ re_output = re.compile(r'\w*(Q\d+)$')
 re_first = re.compile(r'^(Q\w+)Q\d+$')
 re_last = re.compile(r'^Q\d+(Q\w+)$')
 
+def filterLastOut(str, k):
+	filterStr = ''
+	filterArray = []
+	for i in range(k):
+		filterArray.append(re_output.match(str).group(1))
+		str = str[0:len(str)-len(re_output.match(str).group(1))]
+	for x in range(len(filterArray)):
+		filterStr += filterArray[len(filterArray)-x-1]
+	return filterStr
+
 def visualizeAttack(att, model, real, k):
 	A = pgv.AGraph('simple.dot')
 	strReal = []
@@ -45,15 +55,18 @@ def visualizeAttack(att, model, real, k):
 	if re_output.match(att[0]).group(1) not in realOutput:
 		A.add_node(re_output.match(att[0]).group(1),color='red',shape='doubleoctagon')
 		A.add_edge(attNode[len(attNode)-1],re_output.match(att[0]).group(1),color='red')
+	elif filterLastOut(att[0],k) not in realOutput:
+		A.add_node(filterLastOut(att[0], k),color='red',shape='doubleoctagon')
+		A.add_edge(attNode[len(attNode)-1],filterLastOut(att[0],k),color='red')
+		
 	for node in bestNode:
-		A.add_node(node,color='yellow')
+		A.add_node(node, color='yellow')
 	for node in bestNode:
 		for node1 in bestNode:
 		    if A.has_edge(node, node1):
 			    A.get_edge(node,node1).attr['color']='green'
 	A.layout(prog='dot') # layout with default (neato)
 	A.draw('showAttack['+att[0]+'].png') # draw png
-
 
 def dotdraw(k,cycle):
 	A=pgv.AGraph()
@@ -64,18 +77,19 @@ def dotdraw(k,cycle):
 	#print(seqState,binState)
 	#print(seqTrans)
 	
-	for state in seqState:
+	#for state in seqState:
 			#dot.node(state, 'x%d' %seqState.index(state) + '\n%s' %re_output.match(state).group(1))
 			#A.add_node(state, label='x%d' %seqState.index(state) + '\n%s' %state)
-			A.add_node(state, label='x%d' %seqState.index(state) + '\n%s' %re_output.match(state).group(1))
+			#A.add_node(state, label='x%d' %seqState.index(state) + '\n%s' %re_output.match(state).group(1))
+			#A.add_node(state, label='x%d' %seqState.index(state) + '\n%s' %re_output.match(state).group(1))
 	
 	for trans in seqTrans:
-		#print(trans)
 		#dot.edge(re_first.match(trans).group(1), re_last.match(trans).group(1))
 		#print(binState[seqState.index(re_first.match(trans).group(1))],binState[seqState.index(re_last.match(trans).group(1))])
 		lab = label(binState[seqState1.index(re_output.match(re_first.match(trans).group(1)).group(1))],binState[seqState1.index(re_output.match(re_last.match(trans).group(1)).group(1))])
 		#print(lab)
-		A.add_edge(re_first.match(trans).group(1), re_last.match(trans).group(1), label=','.join(lab))
+		#A.add_edge(re_first.match(trans).group(1), re_last.match(trans).group(1), label=','.join(lab))
+		A.add_edge(binState[seqState1.index(re_output.match(re_first.match(trans).group(1)).group(1))], binState[seqState1.index(re_output.match(re_last.match(trans).group(1)).group(1))], label=','.join(lab))
 
 	out = []
 	collect = []
@@ -118,6 +132,7 @@ def dotdraw_net(k,cycle):
 	#print(allPath)
 	#nx.draw(G, pos=nx.spring_layout(G), arrows=True, with_labels=True)
 	#plt.savefig('test_9.png')
+	#测试而已
 	#plt.show()
 	return (len(seqState), len(seqTrans), len(allPath), allPath, seqState, seqTrans)
 if __name__ == '__main__':
